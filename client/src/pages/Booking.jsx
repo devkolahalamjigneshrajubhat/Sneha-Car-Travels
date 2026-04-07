@@ -97,18 +97,15 @@ Please confirm my booking.`;
     const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
 
     try {
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          pickupLocation: formData.pickupLocation,
-          dropLocation: formData.dropLocation,
-          date: formData.date,
-          message: `Service: ${service.serviceName || 'Custom'} | Age: ${formData.age} | Gender: ${formData.gender} | ${formData.message}`,
-        }),
-      });
+      const BASE_URL = "https://sneha-car-travels.onrender.com";
+
+fetch(`${BASE_URL}/api/bookings`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(formData)
+});
 
       const data = await response.json();
 
