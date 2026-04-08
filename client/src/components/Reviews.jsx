@@ -3,24 +3,27 @@ import { motion } from 'framer-motion';
 import { FiStar, FiEdit2, FiLoader } from 'react-icons/fi';
 import ReviewForm from './ReviewForm';
 
+// ✅ Move BASE_URL outside component (better practice)
+const BASE_URL = import.meta.env.VITE_API_URL || "https://sneha-car-travels.onrender.com";
+
 const defaultReviews = [
   {
     name: 'Rajesh Kumar',
     location: 'Vijayawada',
     rating: 5,
-    message: 'Excellent service! The driver was very professional and the car was clean. Highly recommended for anyone looking for reliable car rentals in Vijayawada.',
+    message: 'Excellent service! The driver was very professional and the car was clean.',
   },
   {
     name: 'Praveen Reddy',
     location: 'Hyderabad',
     rating: 5,
-    message: 'Booked for Vijayawada to Hyderabad drop. Smooth journey, on-time pickup and drop. Will definitely use again for future trips.',
+    message: 'Smooth journey, on-time pickup and drop. Will definitely use again.',
   },
   {
     name: 'Srinivas Rao',
     location: 'Vijayawada',
     rating: 5,
-    message: 'Great experience with Sneha Car Travels. Affordable pricing and excellent customer service. My go-to taxi service now!',
+    message: 'Affordable pricing and excellent customer service.',
   },
 ];
 
@@ -32,9 +35,16 @@ export default function Reviews() {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch('/api/reviews');
+      const response = await fetch(`${BASE_URL}/api/reviews`);
+
+      // ✅ Handle backend not responding properly
+      if (!response.ok) {
+        throw new Error("Failed to fetch");
+      }
+
       const data = await response.json();
-      if (data.success && data.reviews.length > 0) {
+
+      if (data.success && data.reviews?.length > 0) {
         setReviews(data.reviews);
         setUseDefault(false);
       } else {
@@ -42,6 +52,7 @@ export default function Reviews() {
         setUseDefault(true);
       }
     } catch (err) {
+      console.error("Error fetching reviews:", err);
       setReviews(defaultReviews);
       setUseDefault(true);
     } finally {
@@ -54,28 +65,28 @@ export default function Reviews() {
   }, []);
 
   const handleReviewSubmitted = () => {
-    fetchReviews();
+    fetchReviews(); // refresh after submit
   };
 
   return (
     <section id="reviews" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             What Our Customers Say
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Don't just take our word for it - hear from our satisfied customers
+          <p className="text-gray-600 text-lg">
+            Real reviews from our happy customers
           </p>
-          <div className="w-24 h-1 bg-primary mx-auto rounded-full mt-4" />
         </motion.div>
 
+        {/* LOADING */}
         {loading ? (
           <div className="flex justify-center py-12">
             <FiLoader className="w-8 h-8 text-primary animate-spin" />
@@ -87,49 +98,44 @@ export default function Reviews() {
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                transition={{ delay: index * 0.15 }}
+                className="bg-white p-8 rounded-2xl shadow-lg"
               >
-                <div className="flex items-center gap-1 mb-4">
+                {/* STARS */}
+                <div className="flex mb-4">
                   {[...Array(review.rating)].map((_, i) => (
-                    <FiStar key={i} className="w-5 h-5 text-primary fill-current" />
+                    <FiStar key={i} className="text-primary fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-600 mb-6 italic">"{review.message}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                    <span className="text-primary font-semibold text-lg">
-                      {review.name.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                    <p className="text-gray-500 text-sm">{review.location}</p>
-                  </div>
+
+                {/* MESSAGE */}
+                <p className="text-gray-600 mb-6 italic">
+                  "{review.message}"
+                </p>
+
+                {/* USER */}
+                <div>
+                  <h4 className="font-semibold">{review.name}</h4>
+                  <p className="text-sm text-gray-500">{review.location}</p>
                 </div>
               </motion.div>
             ))}
           </div>
         )}
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center mt-12"
-        >
+        {/* BUTTON */}
+        <div className="text-center mt-12">
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 text-primary font-semibold hover:underline bg-transparent border-none cursor-pointer"
+            className="text-primary font-semibold hover:underline"
           >
-            <FiEdit2 className="w-5 h-5" />
+            <FiEdit2 className="inline mr-2" />
             Leave a Review
           </button>
-        </motion.div>
+        </div>
       </div>
 
+      {/* REVIEW FORM */}
       <ReviewForm
         isOpen={showForm}
         onClose={() => setShowForm(false)}
