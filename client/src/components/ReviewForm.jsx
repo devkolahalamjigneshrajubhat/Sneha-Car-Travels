@@ -53,11 +53,15 @@ export default function ReviewForm({ isOpen, onClose, onReviewSubmitted }) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    const BASE_URL = import.meta.env.VITE_API_URL || "https://sneha-car-travels.onrender.com";
+
+fetch(`${BASE_URL}/api/reviews`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(reviewData)
+});
 
       const data = await response.json();
 
